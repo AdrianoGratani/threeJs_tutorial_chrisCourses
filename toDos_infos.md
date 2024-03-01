@@ -71,6 +71,10 @@
   2. create a scene, a camera, a render;
 
   3. create a plane;
+     - inizia con geometrie semplici come quadrati;
+     - ti serve una geometry e una material;
+       - se hai una geometry e una material puoi creare una mesh;
+       
 
   4. modify to taste with dat.gui;
 
