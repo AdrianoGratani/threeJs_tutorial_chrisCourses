@@ -29,20 +29,60 @@ document.body.appendChild(renderer.domElement);
 
                                                                   // now it's time to do the RENDERING by calling the add() method over scene with the mesh as parameter
                                                                   // and then use the .render() method over renderer
-// scene.add(mesh);                                                  // la scene adesso ha il mesh di geometry e material, forma e colore,
+// scene.add(mesh);                                               // la scene adesso ha il mesh di geometry e material, forma e colore,
 
 
 camera.position.z = 5;                                            // la camera e' il tuo occhio, digli dove posizionarsi;
                                                                   // usa .render() sul renderer con scene come parametro e la videoacamera, il nostro occhio, come secondo parametro;
 const planeGeometry = new THREE.PlaneGeometry(5, 5, 10, 10)
-const planeMaterial = new THREE.MeshBasicMaterial({color: 0xff0000,  side: THREE.DoubleSide})
+// const planeMaterial = new THREE.MeshBasicMaterial({color: 0xff0000,  side: THREE.DoubleSide})    // MeshBasicMaterial doesn't react to light effects
+
+const planeMaterial = new THREE.MeshPhongMaterial({ color: 0xff0000, side: THREE.DoubleSide, flatShading: THREE.FlatShading });    // MeshPhong Materials react to light effects. you have to create a light to see this material;
+
 const planeMesh = new THREE.Mesh(planeGeometry, planeMaterial)
 scene.add(planeMesh)
+
+// Mesh object has all the infos we need to creat the JAGGED effect in our plane:
+// Mesh.geometry.attributes.position.array.[0-99]
+console.log(planeMesh.geometry.attributes.position.array)
+// puoi modificare questo array per creare degli effetti di luce usando un for loop:  for (let i = 0; i < arrayLength; i++){ // do something }
+// first, for readability sake apply object destructuring to the Mesh object so that you can easily access the position object in your for loop:
+const {array} = planeMesh.geometry.attributes.position;   // now you can access the Mesh object, specifically the arrays concerning its lighting position, through referencing `array`;
+console.log(array)
+for (let i = 0; i < array.length; i+=3){                         //IMPORTANT: this array data is set: 1 x  2 y 3 z and so on. if you skip 2 and 3, it will console log only the z value;
+    const x = array[i]
+    const y = array[i+1]
+    const z = array[i+2];
+    
+    console.log(`x at ${i}: ${x}`);                                     // to check if array and this loop works
+    console.log(`y at ${i+1}: ${y}`);
+    console.log(`z at ${i+2}: ${z}`);
+
+    // can alter the geometry by changing x y or z values;
+    // array[i] = x + 3;   // move to the right;
+    // change the z: closer, furthest, change shape assigning a Math.random to each iteration on z:
+    // array[i + 2] = z - 6;    // lontano
+    // array[i + 2] = z + 3;    // closer
+    array[i + 2] = z + Math.random();   // still, the plane looks flat; you have to add a new property to the phong in the MeshPhongMaterial: THREE.flatShading();
+
+}
+
+
+
+
+
+// light for the Phong, two args color and intensity:
+const light = new THREE.DirectionalLight(0xffffff, 1);            // not enough yet: you have to position this light in our scene
+// position of the light using .set(), three args, x y z:
+light.position.set(0, 0, 1);                                       // now you have to .add() the light to the scene as arg
+// add the light to the scene:
+scene.add(light);                                                  // now, the light is visible. you created the light, you assigned poosition coordinates the light, you added the light with those specific coordinates in the scene;
+
 
 function animate() {
     requestAnimationFrame(animate)
     renderer.render(scene, camera)                                     // bisogna mettere renderer nell'infinite loop per garantire la sua animaione aggirnata;
-    // box animation
+    // box animation:
     // mesh.rotation.x += 0.05
     // mesh.rotation.y += 0.05
 
