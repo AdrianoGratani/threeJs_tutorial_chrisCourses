@@ -1,4 +1,33 @@
+import * as dat from 'dat.gui';
 import * as THREE from 'https://unpkg.com/three@0.126.1/build/three.module.js'; // 0.126.1  altrimenti una v troppo recente non e' supportata sulla tua GPU
+// console.log(dat)    // to check if dependency is working;
+
+const gui = new dat.GUI();               // to use dat.gui you ha ve to instanciate
+const world = {               // crei un oggetto per conservare la proprieta da manipolare tramite dat.gui
+    plane: {
+        width: 10
+    }
+}
+// ti serve un event listener per collegare dat.gui ad un effettivo cambiamento estetico, e le sue keys devono essere messe in relazione con il planematerial;
+gui.add(world.plane, 'width', 1, 20).onChange(                            // mandi la proprieta a dat.gui , add min and max values to the default which is 10
+    () => {
+                                                                                                     //console.log(planeMesh.geometry)
+       planeMesh.geometry.dispose();                                                              /// get rid of the previous data == constant re update when onChange is true
+       planeMesh.geometry = new THREE.PlaneGeometry(world.plane.width, 10, 10, 10)                 // as you scroll width in dat.gui, width gets updated = the width of planeGeometry gets updated to data stored in the object
+    
+        // console.log(planeMesh.geometry.attributes.position.array)
+        const {array} = planeMesh.geometry.attributes.position;
+        for (let i = 0; i < array.length; i+=3){
+        const x = array[i]
+        const y = array[i+1]
+        const z = array[i+2];
+
+        array[i + 2] = z + Math.random();
+    }
+}
+);
+
+
 
 
 // OUR 'SCENE':
@@ -48,15 +77,15 @@ console.log(planeMesh.geometry.attributes.position.array)
 // puoi modificare questo array per creare degli effetti di luce usando un for loop:  for (let i = 0; i < arrayLength; i++){ // do something }
 // first, for readability sake apply object destructuring to the Mesh object so that you can easily access the position object in your for loop:
 const {array} = planeMesh.geometry.attributes.position;   // now you can access the Mesh object, specifically the arrays concerning its lighting position, through referencing `array`;
-console.log(array)
+// console.log(array)
 for (let i = 0; i < array.length; i+=3){                         //IMPORTANT: this array data is set: 1 x  2 y 3 z and so on. if you skip 2 and 3, it will console log only the z value;
     const x = array[i]
     const y = array[i+1]
     const z = array[i+2];
     
-    console.log(`x at ${i}: ${x}`);                                     // to check if array and this loop works
-    console.log(`y at ${i+1}: ${y}`);
-    console.log(`z at ${i+2}: ${z}`);
+    // console.log(`x at ${i}: ${x}`);                                     // to check if array and this loop works
+    // console.log(`y at ${i+1}: ${y}`);
+    // console.log(`z at ${i+2}: ${z}`);
 
     // can alter the geometry by changing x y or z values;
     // array[i] = x + 3;   // move to the right;
