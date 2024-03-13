@@ -1,23 +1,39 @@
-import * as dat from 'dat.gui';
+import * as dat from 'dat.gui'; // npm install dat.gui --save and check package.json
 import * as THREE from 'https://unpkg.com/three@0.126.1/build/three.module.js'; // 0.126.1  altrimenti una v troppo recente non e' supportata sulla tua GPU
 // console.log(dat)    // to check if dependency is working;
 
-const gui = new dat.GUI();               // to use dat.gui you ha ve to instanciate
+
+// console.log(dat)
+
+
+const gui = new dat.GUI();               // to use dat.gui you have to instanciate the GUI object
+// aggiungi le probrieta' al GUI tramite un gui.add() e chiamalo world e fai  gui.add(world.key, min , max)
+// console.log(gui)
 const world = {               // crei un oggetto per conservare la proprieta da manipolare tramite dat.gui
     plane: {
-        width: 10
+        width: 10,
+        height: 2
     }
 }
+
+// then you have to integrate the dat.gui interface and its world object setting with your code, quindi usa un .onChange su gui.add === un event listener per ogni cambiamento nela data di dat.gui
 // ti serve un event listener per collegare dat.gui ad un effettivo cambiamento estetico, e le sue keys devono essere messe in relazione con il planematerial;
 gui.add(world.plane, 'width', 1, 20).onChange(                            // mandi la proprieta a dat.gui , add min and max values to the default which is 10
     () => {
-                                                                                                     //console.log(planeMesh.geometry)
+       //    console.log(world.plane.width)     whenever I change the value width on the browser's dat.gui, onChange gets triggered and does something       //console.log(planeMesh.geometry)
+       // you can put your geometry data in this onChange: whenever you use dat.gui, the geometry data will be updated accordingly
+       //    console.log(planeMesh.geometry)
+       // first you use .dispose() === your planeGeometry has to get rid of the old data related to the object, frame by frame
        planeMesh.geometry.dispose();                                                              /// get rid of the previous data == constant re update when onChange is true
+       // select the .geometry of your 'planeMesh' with dat.gui, to do so the .geometry of planeMesh has to take into account the property value stored in the world object:
+       // since you use .dispose, you can create each moment a new THREE.planeGeometery
        planeMesh.geometry = new THREE.PlaneGeometry(world.plane.width, 10, 10, 10)                 // as you scroll width in dat.gui, width gets updated = the width of planeGeometry gets updated to data stored in the object
-    
+        // now onChange needs the randomization of vertices of the geometry, otherwise, as you change the data with dat.gui, it will be gone, and restored only on f5
         // console.log(planeMesh.geometry.attributes.position.array)
         const {array} = planeMesh.geometry.attributes.position;
-        for (let i = 0; i < array.length; i+=3){
+
+        //add the randomizatin of the value for your array.data from the geometry object, along with the whole for loop for accessing this data
+        for (let i = 0; i < array.length; i += 3){
         const x = array[i]
         const y = array[i+1]
         const z = array[i+2];
@@ -26,6 +42,36 @@ gui.add(world.plane, 'width', 1, 20).onChange(                            // man
     }
 }
 );
+
+// do the same for height: access the height of the geometry using dat.gui:
+// create 'height' key on world object
+// a onChange .add() to gui , a dispose() of the geometry  and add a new THREE PlaneGeometry with world.plane.height
+
+gui.add(world.plane, 'height', 1, 20).onChange(   // access world / get 'height' / set min, set max
+    () => {
+        planeMesh.geometry.dispose();
+        planeMesh.geometry = new THREE.PlaneGeometry(world.plane.width, world.plane.height, 10, 10)
+        // ERROR: you THOUGHT you don't need any randomization here since is managed by the previous onChange.
+
+        const {array} = planeMesh.geometry.attributes.position;   // inside position you can find the array
+        // is this:
+        // console.log(plane.Mesh.geometry.attributes.position.array);
+
+        for (let i = 0; i < array.length; i +=3){
+            const x = array[i]
+            const y = array[i + 1]
+            const z = array[i + 2]   // I only want to randomize the height value so z === the third multiple value in {array}
+
+            array[i + 2] = z + Math.random();
+            // console.log(array[i + 2] = z + Math.random());
+            // array[i + 2] = Math.random() * 6;
+            // console.log(Math.random(1) * 10)
+
+        }
+    }
+
+)
+
 
 
 
